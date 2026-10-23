@@ -8,8 +8,9 @@
 
 def call(String repoName, String imageTag, String region, String ecrRegistry) {
 
-    // Sanitise job name (may contain / for folder-organised jobs) → safe profile name
-    def buildProfile = "${env.JOB_NAME}_${env.BUILD_NUMBER}".replaceAll('[^A-Za-z0-9_-]', '_')
+    // Profile includes repoName so 4 parallel stages don't write to the same
+    // profile simultaneously and corrupt ~/.aws/credentials
+    def buildProfile = "${env.JOB_NAME}_${env.BUILD_NUMBER}_${repoName}".replaceAll('[^A-Za-z0-9_-]', '_')
     def roleArn      = env.ECR_ROLE_ARN   // set in pipeline environment block
 
     sh """
